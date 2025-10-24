@@ -1,4 +1,3 @@
-import json
 import os
 
 import pandas as pd
@@ -15,48 +14,33 @@ from google.analytics.data_v1beta.types import (
 
 class GA4Client:
     def __init__(self, property_id: str, credentials_path: str):
-        """Inicializa el cliente GA4.
-
-        El por qué: Buscamos credenciales seguras de st.secrets primero.
-        Si no están, recurrimos a la ruta local (credentials.json) para el desarrollo.
-        """
         self.property_id = property_id
 
-        credentials = None
-
-        # 1. Intenta cargar credenciales de Streamlit Secrets (Producción)
-        if "ga4" in st.secrets:
-            st.info("Usando credenciales de Streamlit Secrets (Producción)")
-            try:
-                # Las credenciales de Streamlit están como diccionario. Las convertimos a string JSON.
-                credentials_json_str = json.dumps(st.secrets["ga4"])
-                credentials = credentials_json_str
-            except Exception as e:
-                st.error(f"Error al procesar secrets de GA4: {e}")
-                st.stop()
-
-        # 2. Si no hay secrets, usa la ruta local (Desarrollo)
-        elif os.path.exists(credentials_path):
-            st.warning(f"Usando ruta de archivo local: {credentials_path} (Desarrollo)")
-            credentials = credentials_path
-
-        else:
-            st.error(
-                f"❌ ERROR: No se encontraron credenciales seguras ('ga4' en secrets) ni el archivo local en {credentials_path}."
-            )
-            st.stop()
-
         try:
-            # Inicializar cliente, acepta tanto la ruta (string) como el contenido JSON (string)
-            if os.path.exists(credentials):  # Es una ruta
-                self.client = BetaAnalyticsDataClient.from_service_account_json(
-                    credentials
-                )
-            else:  # Es el contenido JSON (viene de st.secrets)
-                # La función necesita que el contenido JSON sea un string, no un dict
+            # 1. Lógica para Cloud (st.secrets)
+            if "ga4" in st.secrets:
+                st.info("Usando credenciales seguras de Streamlit Secrets (Producción)")
+
+                # SOLUCIÓN: Convertir el objeto AttrDict de Streamlit a un diccionario estándar de Python.
+                # El método from_dict() o .to_dict() o simplemente usar dict() en el objeto lo resuelve.
+                creds_dict = dict(st.secrets["ga4"])
+
+                # Usar from_service_account_info que acepta un diccionario estándar
                 self.client = BetaAnalyticsDataClient.from_service_account_info(
-                    json.loads(credentials)
+                    creds_dict
                 )
+
+            # 2. Lógica para Desarrollo Local (ruta de archivo)
+            elif os.path.exists(credentials_path):
+                st.warning(
+                    f"Usando ruta de archivo local: {credentials_path} (Desarrollo)"
+                )
+                self.client = BetaAnalyticsDataClient.from_service_account_json(
+                    credentials_path
+                )
+            else:
+                st.error("❌ ERROR: No se encontraron credenciales válidas.")
+                st.stop()
 
         except Exception as e:
             st.error(f"Error al conectar con GA4: {type(e).__name__} - {str(e)}")

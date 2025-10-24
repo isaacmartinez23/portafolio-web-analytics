@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuración GA4
-GA4_PROPERTY_ID = os.getenv("GA4_PROPERTY_ID", "123456789")
+GA4_PROPERTY_ID = os.getenv("GA4_PROPERTY_ID", "468144427")
 CREDENTIALS_PATH = os.getenv("CREDENTIALS_PATH", "credentials.json")
 
 # Configuración Streamlit

@@ -1,6 +1,6 @@
-streamlit==1.28.1
-google-analytics-data==0.17.1
-pandas==2.0.3
-plotly==5.17.0
-python-dotenv==1.0.0
-streamlit-option-menu==0.3.6
+streamlit
+google-analytics-data
+pandas
+plotly
+python-dotenv
+streamlit-option-menu

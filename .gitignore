@@ -1,0 +1,13 @@
+# Credenciales sensibles
+credentials.json
+.env
+
+# Entorno virtual
+venv/
+__pycache__/
+*.pyc
+.streamlit/
+
+# Sistema
+.DS_Store
+Thumbs.db
